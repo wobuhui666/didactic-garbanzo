@@ -1,8 +1,7 @@
-// edge-functions/trackers.js
-
 const SOURCES = [
   "https://raw.githubusercontent.com/ngosang/trackerslist/master/trackers_best.txt",
   "https://raw.githubusercontent.com/DeSireFire/animeTrackerList/master/AT_best.txt",
+  "https://cf.trackerslist.com/best.txt",
 ];
 
 async function fetchText(url) {
@@ -22,7 +21,8 @@ async function fetchText(url) {
 
 function parseTrackers(text) {
   return text
-    .split(/\r?\n/)
+    // 兼容一行一个、空行分隔、空格分隔
+    .split(/\s+/)
     .map((line) => line.trim())
     .filter(Boolean)
     .filter((line) => !line.startsWith("#"))
@@ -75,7 +75,7 @@ async function handleGet() {
   });
 }
 
-export default async function onRequest(context) {
+export default async function trackerHandler(context) {
   const method = context.request.method;
 
   if (method !== "GET" && method !== "HEAD") {
