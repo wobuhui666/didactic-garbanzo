@@ -29,7 +29,7 @@ function parseTrackers(text) {
     .filter((line) => /^(udp|http|https|ws|wss):\/\//i.test(line));
 }
 
-export async function onRequestGet() {
+async function handleGet() {
   const results = await Promise.allSettled(SOURCES.map(fetchText));
 
   const trackers = new Set();
@@ -75,13 +75,18 @@ export async function onRequestGet() {
   });
 }
 
-// 非 GET 也给个明确提示
-export function onRequest() {
-  return new Response("Method Not Allowed\n", {
-    status: 405,
-    headers: {
-      "Content-Type": "text/plain; charset=utf-8",
-      "Allow": "GET",
-    },
-  });
+export default async function onRequest(context) {
+  const method = context.request.method;
+
+  if (method !== "GET" && method !== "HEAD") {
+    return new Response("Method Not Allowed\n", {
+      status: 405,
+      headers: {
+        "Content-Type": "text/plain; charset=utf-8",
+        "Allow": "GET, HEAD",
+      },
+    });
+  }
+
+  return handleGet();
 }
